@@ -1,0 +1,48 @@
+<UserControl x:Class="MWBookmark.CategoryComboBoxControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        <DockPanel
+                LastChildFill="True"
+                HorizontalAlignment="Stretch">
+                <TextBlock
+                        DockPanel.Dock = "Left"
+                        FontSize="16"
+                        Height="32"
+                        Margin="4,0,4,0"
+                        VerticalAlignment="Center"
+                        Text="カテゴリ:" />
+                        
+                <StackPanel
+                        DockPanel.Dock = "Right"
+                        Orientation="Horizontal">
+                        <Button
+                                Content="＋"
+                                Height="32"
+                                Width="32"
+                                Margin="4,0,0,0"
+                                Command="{Binding AddCategoryCommand}" />
+                        <Button
+                                Content="✎"
+                                Height="32"
+                                Width="32"
+                                Margin="4,0,0,0"
+                                Command="{Binding UpdateCategoryCommand}" />
+
+                        <Button
+                                Content="ー"
+                                Height="32"
+                                Width="32"
+                                Margin="4,0,8,0"
+                                Command="{Binding DeleteCategoryCommand}" />
+                </StackPanel>
+                
+                <ComboBox
+                        FontSize="16"
+                        Height="32"
+                        Margin="4,0,0,0"
+                        DisplayMemberPath="Name"
+                        SelectedItem="{Binding Category.Value}"
+                        ItemsSource="{Binding Categories}" />
+
+        </DockPanel>
+</UserControl>

@@ -1,0 +1,114 @@
+﻿<Window x:Class="MWBookmark.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MWBookmark"
+        xmlns:h="clr-namespace:Maywork.WPF.Helpers"
+        mc:Ignorable="d"
+        FontSize="16"
+        Title="MWBookmark" Height="800" Width="450">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <!-- カテゴリエリア-->
+            <local:CategoryComboBoxControl
+                Grid.Row="0"
+                Padding="8"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"/>
+            <!-- 一覧エリア -->
+            <Grid Grid.Row="1"
+                h:FileDropHelper.Enable="True"
+                h:FileDropHelper.DropCommand="{Binding FileDropCommand}">
+                <ListView x:Name="ItemList"
+                    ItemsSource="{Binding BookmarksView}"
+                    SelectedValue="{Binding Bookmark.Value}"
+                    MouseDoubleClick="ItemList_MouseDoubleClick"
+                    PreviewMouseLeftButtonDown="ItemList_PreviewMouseLeftButtonDown"
+                    MouseMove="ItemList_MouseMove">
+                    <ListView.InputBindings>
+                        <KeyBinding Key="Delete"
+                                    Command="{Binding DeleteBookmarkCommand}"
+                                    CommandParameter="{Binding Bookmark.Value}" />
+                    </ListView.InputBindings>
+
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="貼り付け"
+                                    Command="{Binding PlacementTarget.DataContext.PasteBookmarkCommand,
+                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Tag"
+                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListView}}" />
+
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu>
+                                        <MenuItem Header="コピー"
+                                                Command="{Binding PlacementTarget.Tag.CopyBookmarkCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+
+                                        <MenuItem Header="切り取り"
+                                                Command="{Binding PlacementTarget.Tag.CutBookmarkCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+
+                                        <Separator />
+
+                                        <MenuItem Header="削除"
+                                                Command="{Binding PlacementTarget.Tag.DeleteBookmarkCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                            RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="False">
+                            <GridViewColumn
+                                Header="名前"
+                                Width="140"
+                                DisplayMemberBinding="{Binding Name}"/>
+                            <GridViewColumn
+                                Header="コメント"
+                                Width="220"
+                                DisplayMemberBinding="{Binding DispComment}"/>
+                        </GridView>
+                    </ListView.View>                    
+                </ListView>
+            </Grid>
+            <!-- テキスト編集--><!-- プレビュー -->
+            <Grid Grid.Row="2">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="3*"/>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="1"
+                        Grid.Column="1"
+                        Source="{Binding ImagePreview.Value}"/>
+                </Grid>
+                <TextBox AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         Background="Transparent"
+                         Text="{Binding SelectedValue.Comment.Value, ElementName=ItemList, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </Grid>
+</Window>
