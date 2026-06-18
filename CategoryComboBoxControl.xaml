@@ -20,29 +20,37 @@
                                 Height="32"
                                 Width="32"
                                 Margin="4,0,0,0"
-                                Command="{Binding AddCategoryCommand}" />
+                                Click="AddCategoryButton_Click" />
+                        <!-- Command="{Binding AddCategoryCommand}" -->
                         <Button
+                                x:Name="UpdateCategoryButton"
                                 Content="✎"
                                 Height="32"
                                 Width="32"
                                 Margin="4,0,0,0"
-                                Command="{Binding UpdateCategoryCommand}" />
+                                IsEnabled="false"
+                                Click="UpdateCategoryButton_Click" />
+                        <!-- Command="{Binding UpdateCategoryButton_Click}" -->
 
                         <Button
+                                x:Name="DeleteCategoryButton"
                                 Content="ー"
                                 Height="32"
                                 Width="32"
                                 Margin="4,0,8,0"
+                                IsEnabled="false"
                                 Command="{Binding DeleteCategoryCommand}" />
                 </StackPanel>
                 
                 <ComboBox
+                        x:Name="CategoryComboBox"
                         FontSize="16"
                         Height="32"
                         Margin="4,0,0,0"
                         DisplayMemberPath="Name"
                         SelectedItem="{Binding Category.Value}"
-                        ItemsSource="{Binding Categories}" />
+                        ItemsSource="{Binding Categories}" 
+                        SelectionChanged="CategoryComboBox_SelectionChanged" />
 
         </DockPanel>
 </UserControl>

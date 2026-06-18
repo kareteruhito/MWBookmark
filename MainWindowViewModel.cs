@@ -19,7 +19,6 @@ namespace MWBookmark;
 public class MainWindowViewModel : INotifyPropertyChanged, IDisposable
 {
 // TODO:
-// ListViewItemダブルクリックで関連付けで開く。
     private readonly AppDatabase _db = new();
  
     public ReactiveCollection<BookmarkItem> Bookmarks { get; } = [];
@@ -33,8 +32,8 @@ public class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     public ReactiveProperty<CategoryEntity?> Category { get; } = new();
 
     public ReactiveCommand DeleteCategoryCommand { get; }
-    public ReactiveCommand AddCategoryCommand { get; }
-    public ReactiveCommand UpdateCategoryCommand { get; }
+    public ReactiveCommand<string> AddCategoryCommand { get; }
+    public ReactiveCommand<string> UpdateCategoryCommand { get; }
     public ReactiveProperty<BitmapSource?> ImagePreview { get; set; } = new();
 
     private BinaryCache _cache = new("image-cache.db");
@@ -237,9 +236,9 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
         // ************ カテゴリ ************
         Categories.AddTo(Disposable);
 
-        Category.Subscribe(_ =>
+        Category.Subscribe(category =>
         {
-             BookmarksView.Refresh();
+            BookmarksView.Refresh();
         })
         .AddTo(Disposable);
 
@@ -253,6 +252,17 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
 
                 var item = Category.Value;
 
+                var defaultCategory = Categories
+                    .First(x => x.Name == CategoryEntity.DefaultName);
+
+                foreach (var bookmark in Bookmarks.Where(x => x.Category == item.Name))
+                {
+                    bookmark.Category = defaultCategory.Name;
+
+                    var entity = ConvertToBookmarkEntity(bookmark);
+                    _db.Bookmarks.Update(entity);
+                }
+
                 _db.Categories.Delete(item.Id);
 
                 Categories.Remove(item);
@@ -260,17 +270,12 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
             })
             .AddTo(Disposable);
 
-        AddCategoryCommand = new ReactiveCommand()
-            .WithSubscribe(() =>
+        AddCategoryCommand = new ReactiveCommand<string>()
+            .WithSubscribe(name =>
             {
-                var dialog = new AddCategoryDialog
-                {
-                    Owner = App.Current.MainWindow,
-                };
+                name = name.Trim();
 
-                if (dialog.ShowDialog() == false) return;
-
-                string name = dialog.CategoryName.Trim();
+                if (string.IsNullOrWhiteSpace(name)) return;
 
                 if (Categories.Any(x => x.Name == name)) return;
 
@@ -286,24 +291,15 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
             })
             .AddTo(Disposable);
 
-        UpdateCategoryCommand = Category
-            .Select(x => x is not null && x.Name != CategoryEntity.DefaultName)
-            .ToReactiveCommand()
-            .WithSubscribe(() =>
+        UpdateCategoryCommand = new ReactiveCommand<string>()
+            .WithSubscribe(name =>
             {
                 if (Category.Value is null) return;
                 if (Category.Value.Name == CategoryEntity.DefaultName) return;
 
                 var item = Category.Value;
 
-                var dialog = new AddCategoryDialog(item.Name, "カテゴリ変更")
-                {
-                    Owner = App.Current.MainWindow,
-                };
-
-                if (dialog.ShowDialog() == false) return;
-
-                string name = dialog.CategoryName.Trim();
+                name = name.Trim();
 
                 if (Categories.Any(x => x.Name == name)) return;
 
