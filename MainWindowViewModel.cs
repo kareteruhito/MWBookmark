@@ -332,7 +332,7 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
                 {
                     x.Category = newItem.Name;
 
-                    var e = new BookmarkEntity(x);
+                    var e = ConvertToBookmarkEntity(x);
                     if(_db.Bookmarks.Update(e))
                     {
                         Debug.Print("成功");
@@ -377,7 +377,7 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
                 {
                     _clipboardBookmark.Category = Category.Value.Name;
 
-                    var entity = new BookmarkEntity(_clipboardBookmark);
+                    var entity = ConvertToBookmarkEntity(_clipboardBookmark);
                     _db.Bookmarks.Update(_clipboardBookmark.Id, entity);
 
                     BookmarksView.Refresh();
@@ -451,11 +451,22 @@ Debug.Print($"ZIP Cache NG {sw.ElapsedMilliseconds}ms");
     {
         if (Bookmark.Value is null) return;
         var item = Bookmark.Value;
-        var entity = new BookmarkEntity(item);
+        var entity = ConvertToBookmarkEntity(item);
 
         _db.Bookmarks.Update(item.Id, entity);
     }
-
+    private static BookmarkEntity ConvertToBookmarkEntity(BookmarkItem item)
+    {
+        return new BookmarkEntity
+        {
+            Id = item.Id,
+            Name = item.Name,
+            FullName = item.FullName,
+            Comment = item.Comment.Value,
+            IsDir = item.IsDir,
+            Category = item.Category,
+        };
+    }
     public static BitmapSource TextToBitmapSource(
         string text,
         double fontSize = 128,
